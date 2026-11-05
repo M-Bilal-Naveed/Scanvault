@@ -56,7 +56,7 @@ export function AnimatedSplash({ onDone }: { onDone: () => void }) {
 }
 
 const styles = StyleSheet.create({
-  root: { ...StyleSheet.absoluteFillObject, backgroundColor: palette.ink, alignItems: 'center', justifyContent: 'center', zIndex: 99 },
+  root: { ...StyleSheet.absoluteFill, backgroundColor: palette.ink, alignItems: 'center', justifyContent: 'center', zIndex: 99 },
   sheet: { width: W, height: H, borderRadius: 16, backgroundColor: '#FFFFFF10', borderWidth: 1.5, borderColor: '#FFFFFF30', overflow: 'hidden' },
   reveal: { overflow: 'hidden' },
   lines: { padding: 16, gap: 11 },
