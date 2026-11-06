@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "scanvault",
+    "name": "ScanVault",
     "slug": "scanvault",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -8,7 +8,7 @@
     "scheme": "scanvault",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon",
+      "bundleIdentifier": "com.mbilalnaveed.scanvault",
       "supportsTablet": true,
       "infoPlist": {
         "NSCameraUsageDescription": "ScanVault uses the camera to scan pages. Photos stay on your device.",
@@ -16,6 +16,7 @@
       }
     },
     "android": {
+      "package": "com.mbilalnaveed.scanvault",
       "adaptiveIcon": {
         "backgroundColor": "#0E1630",
         "foregroundImage": "./assets/images/adaptive-icon.png"
@@ -24,7 +25,7 @@
       "predictiveBackGestureEnabled": false
     },
     "web": {
-      "output": "server",
+      "output": "static",
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
@@ -38,14 +39,23 @@
           "resizeMode": "contain"
         }
       ],
-      ["expo-camera", { "cameraPermission": "ScanVault uses the camera to scan pages.", "recordAudioAndroid": false }],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "ScanVault uses the camera to scan pages.",
+          "recordAudioAndroid": false
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "ScanVault reads photos you choose to turn into PDFs.",
+          "cameraPermission": "ScanVault uses the camera to take photos."
+        }
+      ],
       "expo-status-bar",
       "expo-font",
       "expo-sharing"
-    ],
-    "experiments": {
-      "typedRoutes": true,
-      "reactCompiler": true
-    }
+    ]
   }
 }
