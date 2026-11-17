@@ -1,4 +1,5 @@
-import { useColorScheme } from 'react-native';
+import { useColorScheme } from '../hooks/use-color-scheme';
+import { useThemePreferences } from '../store/theme';
 
 export const palette = {
   ink: '#0E1630',
@@ -28,5 +29,8 @@ export const font = {
 };
 
 export function useTheme() {
-  return useColorScheme() === 'dark' ? dark : light;
+  const systemScheme = useColorScheme();
+  const mode = useThemePreferences((state) => state.mode);
+  const scheme = mode === 'system' ? systemScheme : mode;
+  return scheme === 'dark' ? dark : light;
 }
