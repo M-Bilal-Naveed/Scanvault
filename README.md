@@ -1,58 +1,40 @@
-# Welcome to your Expo app 👋
+# ScanVault
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+ScanVault is an Expo and React Native app for creating and managing PDFs on-device.
 
-## Get started
+## Features
 
-1. Install dependencies
+- Scan pages with the camera or import images, then combine them into a PDF.
+- Convert DOCX, PPTX, XLSX, XLS, and CSV files to PDFs using CloudConvert. The selected document is uploaded only after confirmation; CloudConvert's free tier has daily limits.
+- Preview PDFs, share them with installed apps, and save copies to a device folder. On iOS, use **Save to Files** in the share sheet.
+- Extract text from images with on-device OCR. If native recognition is unavailable, the app can use OCR.space after confirmation.
+- Choose System, Light, or Dark appearance in Settings.
 
-   ```bash
-   npm install
-   ```
+Files and preferences are stored locally on the device. Provider API keys are encrypted on-device; documents/images sent for online processing are uploaded to the selected provider. Read each provider's terms and privacy policy before use.
 
-2. Start the app
+## Development
 
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **src/app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+Install dependencies and start the Expo development server:
 
 ```bash
-npm run reset-project
+npm install
+npx expo start
 ```
 
-This command will move the starter code to the **example** directory and create a blank **src/app** directory where you can start developing.
+Native OCR, network status, and encrypted API-key storage use native modules and require a development or production build. Rebuild after changing native dependencies or app configuration:
 
-### Other setup steps
+```bash
+npx expo run:android
+npx expo run:ios
+```
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+Expo Go does not include ScanVault's native OCR module. If you see `Cannot find native module 'ExpoTextExtractor'`, install a development build with the commands above instead of opening the project in Expo Go; rebuild after adding or changing native dependencies.
 
-## Learn more
+To enable online OCR, register for a free OCR.space API key. To enable Office conversion, create a CloudConvert API key with `task.read` and `task.write` scopes using the link in **Settings**. Save the keys in **Settings**; both services impose free-tier limits. Native OCR remains on-device and works offline.
 
-To learn more about developing your project with Expo, look at the following resources:
+Run the project checks with:
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
-# Scanvault
-# Scanvault
+```bash
+npm run lint
+npx tsc --noEmit
+```
