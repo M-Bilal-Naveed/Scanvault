@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import { ScrollView, Text, View, StyleSheet } from 'react-native';
+import React, { useEffect, type ComponentProps } from 'react';
+import { Alert, ScrollView, Text, View, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -8,17 +8,30 @@ import { useLibrary } from '../../store/library';
 import { fmtSize } from '../../services/pdf';
 import { useTheme, font, palette, radius } from '../../theme/tokens';
 
+type HomeAction = {
+  title: string;
+  sub: string;
+  icon: ComponentProps<typeof Ionicons>['name'];
+  color: string;
+  go: () => void;
+};
+
 export default function Home() {
   const t = useTheme();
   const router = useRouter();
   const { items, load } = useLibrary();
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    void load().catch((error: unknown) => {
+      Alert.alert('Library could not be loaded', error instanceof Error ? error.message : String(error));
+    });
+  }, [load]);
 
-  const actions = [
+  const actions: HomeAction[] = [
     { title: 'Images to PDF', sub: 'Camera or gallery', icon: 'images-outline', color: palette.blue, go: () => router.push('/scan') },
     { title: 'Word to PDF', sub: '.docx files', icon: 'document-text-outline', color: palette.teal, go: () => router.push({ pathname: '/office', params: { kind: 'word' } }) },
     { title: 'PowerPoint to PDF', sub: '.pptx files', icon: 'easel-outline', color: palette.amber, go: () => router.push({ pathname: '/office', params: { kind: 'ppt' } }) },
     { title: 'Excel to PDF', sub: '.xlsx, .xls, .csv', icon: 'grid-outline', color: palette.violet, go: () => router.push({ pathname: '/office', params: { kind: 'excel' } }) },
+    { title: 'Image to text', sub: 'Select and copy text', icon: 'scan-outline', color: palette.teal, go: () => router.push('/ocr') },
   ];
 
   return (
@@ -28,7 +41,7 @@ export default function Home() {
         <View style={styles.grid}>
           {actions.map((a) => (
             <PressableScale key={a.title} style={[styles.card, { backgroundColor: t.card, borderColor: t.line }]} onPress={a.go}>
-              <View style={[styles.chip, { backgroundColor: a.color }]}><Ionicons name={a.icon as any} size={22} color={palette.ink} /></View>
+              <View style={[styles.chip, { backgroundColor: a.color }]}><Ionicons name={a.icon} size={22} color={palette.ink} /></View>
               <Text style={[styles.cardTitle, { color: t.text }]}>{a.title}</Text>
               <Text style={[styles.cardSub, { color: t.muted }]}>{a.sub}</Text>
             </PressableScale>
@@ -56,7 +69,7 @@ const styles = StyleSheet.create({
   h1: { fontFamily: font.heavy, fontSize: 32, lineHeight: 38, letterSpacing: -0.6 },
   h2: { fontFamily: font.bold, fontSize: 20, marginTop: 32, marginBottom: 12 },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, marginTop: 24 },
-  card: { width: '48%', flexGrow: 1, padding: 16, borderRadius: radius.lg, borderWidth: 1 },
+  card: { width: '48%', padding: 16, borderRadius: radius.lg, borderWidth: 1 },
   chip: { width: 44, height: 44, borderRadius: 14, alignItems: 'center', justifyContent: 'center', marginBottom: 14 },
   cardTitle: { fontFamily: font.bold, fontSize: 16 },
   cardSub: { fontFamily: font.medium, fontSize: 13, marginTop: 2 },

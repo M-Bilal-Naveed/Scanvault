@@ -1,6 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import * as ImagePicker from "expo-image-picker";
+import { StatusBar } from "expo-status-bar";
 import { useRouter } from "expo-router";
 import { useRef, useState } from "react";
 import {
@@ -29,47 +30,77 @@ export default function Scan() {
   const add = useLibrary((s) => s.add);
 
   const addUris = async (uris: string[]) => {
-    setBusy(true);
     try {
       const out: Page[] = [];
       for (const u of uris) out.push(await normalize(u));
       setPages((p) => [...p, ...out]);
-    } catch (e: any) {
-      Alert.alert("Could not read image", String(e?.message ?? e));
+    } catch (error: unknown) {
+      Alert.alert(
+        "Could not read image",
+        error instanceof Error ? error.message : String(error),
+      );
     }
-    setBusy(false);
   };
 
   const shoot = async () => {
     if (busy) return;
-    const p = await cam.current?.takePictureAsync({ quality: 1 });
-    if (p?.uri) addUris([p.uri]);
+    setBusy(true);
+    try {
+      const picture = await cam.current?.takePictureAsync({ quality: 1 });
+      if (picture?.uri) await addUris([picture.uri]);
+    } catch (error: unknown) {
+      Alert.alert(
+        "Could not take photo",
+        error instanceof Error ? error.message : String(error),
+      );
+    } finally {
+      setBusy(false);
+    }
   };
   const pick = async () => {
-    const r = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ["images"],
-      allowsMultipleSelection: true,
-      quality: 1,
-    });
-    if (!r.canceled) addUris(r.assets.map((a) => a.uri));
+    if (busy) return;
+    setBusy(true);
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ["images"],
+        allowsMultipleSelection: true,
+        quality: 1,
+      });
+      if (!result.canceled) {
+        await addUris(result.assets.map((asset) => asset.uri));
+      }
+    } catch (error: unknown) {
+      Alert.alert(
+        "Could not open gallery",
+        error instanceof Error ? error.message : String(error),
+      );
+    } finally {
+      setBusy(false);
+    }
   };
   const make = async () => {
+    if (busy || pages.length === 0) return;
     setBusy(true);
     try {
       const name = `Scan ${new Date().toLocaleDateString().replace(/\//g, "-")}`;
       const res = await imagesToPdf(pages, "scan", fit);
       await add({ name, ...res });
       router.replace("/(tabs)/library");
-    } catch (e: any) {
-      Alert.alert("PDF failed", String(e?.message ?? e));
+    } catch (error: unknown) {
+      Alert.alert(
+        "PDF failed",
+        error instanceof Error ? error.message : String(error),
+      );
+    } finally {
       setBusy(false);
     }
   };
 
-  if (!perm) return <View style={styles.dark} />;
+  if (!perm) return <View style={styles.dark}><StatusBar style="light" /></View>;
   if (!perm.granted) {
     return (
       <View style={[styles.dark, styles.center]}>
+        <StatusBar style="light" />
         <Ionicons name="camera-outline" size={56} color={palette.teal} />
         <Text style={styles.big}>Allow camera access</Text>
         <Text style={styles.sub}>
@@ -86,8 +117,13 @@ export default function Scan() {
             Use gallery instead
           </Text>
         </PressableScale>
-        <PressableScale onPress={() => router.back()}>
-          <Text style={styles.sub}>Close</Text>
+        <PressableScale
+          accessibilityRole="button"
+          accessibilityLabel="Go back"
+          style={[styles.permissionBack, { top: insets.top + 8 }]}
+          onPress={() => router.back()}
+        >
+          <Ionicons name="arrow-back" size={23} color="#fff" />
         </PressableScale>
       </View>
     );
@@ -95,10 +131,16 @@ export default function Scan() {
 
   return (
     <View style={styles.dark}>
+      <StatusBar style="light" />
       <CameraView ref={cam} style={StyleSheet.absoluteFill} facing="back" />
       <View style={[styles.top, { paddingTop: insets.top + 8 }]}>
-        <PressableScale style={styles.round} onPress={() => router.back()}>
-          <Ionicons name="close" size={24} color="#fff" />
+        <PressableScale
+          accessibilityRole="button"
+          accessibilityLabel="Go back"
+          style={styles.round}
+          onPress={() => router.back()}
+        >
+          <Ionicons name="arrow-back" size={24} color="#fff" />
         </PressableScale>
         <PressableScale
           style={styles.pill}
@@ -175,6 +217,7 @@ const styles = StyleSheet.create({
     padding: 32,
     gap: 14,
   },
+  permissionBack: { position: 'absolute', left: 20, zIndex: 1, width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center', backgroundColor: '#ffffff26' },
   big: {
     fontFamily: font.heavy,
     fontSize: 26,
